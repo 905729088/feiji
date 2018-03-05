@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{margin:0;padding:0;}
+        body{background-color:#000;}
+        .wrap{
+            margin:50px auto;
+            width:300px;
+            height:500px;
+            
+            border:10px solid #fff;
+            
+        }
+        .wrap #box{
+            position:absolute;
+            width:300px;
+            height:500px;
+            overflow: hidden;
+            z-index:99;
+            
+        }
+        .wrap #bg{
+			position:absolute;
+			overflow:hidden;
+			width:300px;
+            height:500px;
+			z-index:1;
+			
+		}
+		.wrap #bg ul{
+			position:absolute;
+			top:-1000px;
+			width:300px;
+            height:500px;
+		}
+		.wrap #bg ul li{
+			width: 100%;
+			height:100%;
+			
+		}
+		.wrap #bg ul li img{
+			display:block;
+			width: 300px;
+			height:500px;
+		}
+        .wrap #box h1{
+
+            margin-top:50px;
+            color:#fff;
+            font-size:30px;
+            text-align:center;
+        }
+        .wrap #box  ul>li{
+            list-style:none;
+            margin:40px auto;
+            height:30px;
+            width:150px;
+            background-color:#fff;
+            color:#000;
+            line-height:30px;
+            text-align:center;
+            cursor:pointer;
+        }
+        .wrap #box  ul>li.diff:hover{
+            color:#fff;
+            background-color:pink;
+        }
+        .wrap #box  ul>li.maxdiff{
+            color:red;
+            background-color:pink;
+        }
+        .wrap #box  ul>li.maxdiff:hover{
+            color:#fff;
+        }
+        .wrap #box .player,.enemy,.bullet,.ebullet,.boom{
+            position:absolute;
+        }
+        .wrap #box .score{
+            margin: 5px 5px;
+            color: #fff;
+        }
+        .wrap #box .over{
+            margin:50px auto ;
+            width: 200px;
+            height:400px;
+            background-color:#fff;
+            overflow: hidden;
+        }
+        .wrap #box .over h2{
+            margin-top:30px;
+            text-align:center;
+        }
+        .wrap #box .over .showScore{
+            margin-top:30px;
+            font-size:14px;
+            font-weight:bold;
+            text-align:center;
+        }
+        .wrap #box .over .scoreText{
+            margin-top:2px;
+            font-size:14px;
+            font-weight:bold;
+            text-align:center;
+        }
+        .wrap #box .over .rest{
+            margin: 180px auto;
+            width:100px;
+            height:30px;
+            background-color:#000;
+            font-size:13px;
+            font-weight:bold;
+            text-align:center;
+            line-height:30px;
+            color: #fff;
+            cursor:pointer;
+        }
+
+        .wrap #box .Prop{
+            position:absolute;
+           
+
+        }
+        .wrap #box .fanghu{
+            position:absolute;
+            z-index: 999;
+        }
+        /*激光*/
+        #laser{
+        	position:absolute;
+        	width: 57px;
+        	height:0;
+        	overflow: hidden;
+        }
+        #laser ul{
+        	position:absolute;
+        	bottom:288px;
+        	width: 100%;
+        	height:288px;
+        }
+        #laser ul li#ht{
+        	position:absolute;
+        	z-index: 2;
+        	top:0;
+			padding: 0;
+			margin: 0;
+        	width: 100%;
+        	height: 100%;
+			background: transparent;
+        	
+        }
+        #laser ul li#ft{
+        	position:absolute;
+        	z-index: 1;
+        	top:283px;
+			padding: 0;
+			margin: 0;
+        	width: 100%;
+        	height: 100%;
+			background: transparent;
+        }
+        #laser ul li img{
+        	vertical-align: top;
+        	width: 100%;
+        	height: 100%;
+        }
+        #ready{
+        	position:absolute;
+        	height: 0px;
+        	width: 56px;
+        }
+        #ready img{
+        	
+        	width: 56px;
+        	height: 100%;
+        	
+        }
+        .explain{
+        	text-align: center;
+        	color:#fff;
+        }
+    </style>
+</head>
+<body id="a">
+	
+	</div>
+    <div class="wrap">
+    	<div id="bg">
+    		<ul>
+        		<li><img src="img/level_1.jpg"  alt="" /></li>
+        		<li><img src="img/level_1.jpg"  alt="" /></li>
+        		<li><img src="img/level_1.jpg"  alt="" /></li>
+       	    </ul>
+    	</div>
+    	
+        <div id="box">
+        	
+        </div>
+    </div>
+     <div class="explain">操作说明:使用WASD进行操作</div>
+    <div style="display: none;">
+    	<img src="img/laser_ready.png" alt="">
+    	<img src="img/boss_bullet.png" alt="">
+    	<img src="img/level_1.jpg" alt="">
+        <img src="img/plane.png" alt="">
+        <img src="img/boom.png" alt="">
+        <img src="img/enemy.png" alt="">
+        <img src="img/bullet.png" alt="">
+        <img src="img/bullet1.png" alt="">
+        <img src="img/bullet2.png" alt="">
+        <img src="img/bullet-enemy.png" alt="">
+        <img src="img/boom2.png" alt="">
+        <img src="img/prop-fanghu.png" alt="">
+        <img src="img/fanghu.png" alt="">
+    </div>
+    <script>
+   			
+    	
+        (function (){
+            window.requestAnimationFrame=window.requestAnimationFrame||function(fn){
+                   return setTimeout(fn,1000/60);
+                };
+            window.cancelAnimationFrame=window.cancelAnimationFrame||clearTimeout;
+            var aBox=document.getElementById("box");
+            var arr=["简单难度","中等难度","困难难度","疯狂模式"];
+			var aBg=document.getElementById("bg").getElementsByTagName("ul")[0];
+			var BgTime;//背景移动的定时器
+			var aBoss;
+			var isBoss=false;//是否有boss
+			var numBoss=1;//第几只boss
+			var showBossScore=50;//出现boss的分数
+			var firing=false;////判断boss是否可以开火
+			
+            init();//初始化界面
+            function init(){
+            	
+                aBox.innerHTML="";
+                var h1=document.createElement("h1");
+                h1.innerHTML="飞机大战 3.0";
+                aBox.appendChild(h1);
+                var aUl=document.createElement("ul");
+                aBox.appendChild(aUl);
+                isBoss=false;
+                numBoss=1;
+                showBossScore=50;
+                firing=false;
+                for(var i=0;i<4;i++){
+                    var aLi=document.createElement("li");
+                    aLi.className=i===3?"maxdiff":"diff";
+                    aLi.innerHTML=arr[i];
+                    aLi.i=i;
+                    aUl.appendChild(aLi);
+                    aLi.onclick=function (e){
+                        e=e||window.event;
+                        onStart(e,this.i);
+                    }
+                }
+            }
+            //游戏开始
+            function onStart(e,n){
+                aBox.innerHTML="";
+                //生成敌人
+                onEnemy(n,onPlayPlane(e,n));
+                //背景移动
+                onBgMove();
+                //积分
+                onScore();
+            }
+            //创建积分
+            function onScore() {
+               aBox.score=0;
+               var s=document.createElement("div");
+                    s.className="score";
+                    s.innerHTML="得分：0";
+                    aBox.appendChild(s);
+            }
+            function onBgMove(){
+            	BgTime=setInterval(bgmove,1000/60);
+            	function bgmove(){
+            		var bTop=aBg.offsetTop;
+            		bTop++;
+            		if(bTop>=-500)bTop=-1000;
+            		
+            		aBg.style.top=bTop+"px";
+            	}
+            	
+            }
+            //创建我军
+            function onPlayPlane(e,index){
+            	var speed=10;
+                var playPlane=new Image();
+                    playPlane.className="player";
+                    playPlane.width=60*0.5;
+                    playPlane.height=36*0.4;
+                    playPlane.src="img/plane.png";
+                    aBox.appendChild(playPlane);
+                    var aBoxOffset=onOffset(aBox);
+                    playPlane.style.left=e.clientX-aBoxOffset.left-playPlane.width/2+"px";
+                    playPlane.style.top=e.clientY-aBoxOffset.top-playPlane.height/2+"px";
+
+                    //飞机的装备
+
+                    /*playPlane.arms={
+                        "fanghu":false,//防护罩
+                    };*/
+                    //飞机的边界
+                var minLeft= -playPlane.width/2,
+                    maxLeft=aBox.clientWidth-playPlane.width/2,
+                    minTop=0,
+                    maxTop=aBox.clientHeight-playPlane.height;
+                    //飞机移动
+                
+                    //键盘控制
+                    playPlane.timeArr=[];
+                   
+                    document.onkeydown=function (e){
+                    	e=e||window.event;
+                    	
+                    	switch(e.keyCode){
+                    		case 87://上
+                    			if(playPlane.timeArr[87]===undefined){
+                    				
+                    				(function m1(){
+                    					var aTop=playPlane.timeArr[83]===undefined?playPlane.offsetTop-speed:playPlane.offsetTop-2*speed;
+                    					aTop=Math.max(aTop,minTop);
+                    					playPlane.style.top=aTop+"px";
+                    					playPlane.timeArr[87]=requestAnimationFrame(m1);
+                    					
+                    				})();
+                    			}
+                    		break;
+                    		case 83://下
+                    			if(playPlane.timeArr[83]===undefined){
+                    				(function m2(){
+                    					var aTop=playPlane.timeArr[87]===undefined?playPlane.offsetTop+speed:playPlane.offsetTop+2*speed;
+                    					aTop=Math.min(aTop,maxTop);
+                    					playPlane.style.top=aTop+"px";
+                    					playPlane.timeArr[83]=requestAnimationFrame(m2);
+                    				})();
+                    			}
+                    		break;
+                    		case 65://左
+                    			if(playPlane.timeArr[65]===undefined){
+                    		
+                    				(function m3(){
+                    					
+                    					var aLeft=playPlane.timeArr[68]===undefined?playPlane.offsetLeft-speed:playPlane.offsetLeft-2*speed;
+                    					aLeft=Math.max(aLeft,minLeft);
+                    					playPlane.style.left=aLeft+"px";
+                    					playPlane.timeArr[65]=requestAnimationFrame(m3);
+                    				})();
+                    			}
+                    		break;
+                    		case 68://右
+                    			if(playPlane.timeArr[68]===undefined){
+                    				
+                    				(function m4(){
+                    					var aLeft=playPlane.timeArr[65]===undefined?playPlane.offsetLeft+speed:playPlane.offsetLeft+2*speed;
+                    					//console.log("R");
+                    					var aLeft=playPlane.offsetLeft+speed;
+                    					aLeft=Math.min(aLeft,maxLeft);
+                    					playPlane.style.left=aLeft+"px";
+                    					playPlane.timeArr[68]=requestAnimationFrame(m4);
+                    				})();
+                    			}
+                    		break;
+                    	}
+                    	 
+                    }
+                     document.onkeyup=function (e){
+                    	e=e||window.event;
+                    	
+                    	cancelAnimationFrame(playPlane.timeArr[e.keyCode]);
+                    	playPlane.timeArr[e.keyCode]=undefined;
+                    	
+                    }
+                   	// 鼠标控制
+                   /* document.onmousemove=function (e){
+                        e=e||window.event;
+                        aBoxOffset=onOffset(aBox);
+                        var aleft=e.clientX-aBoxOffset.left-playPlane.width/2;
+                        var atop=e.clientY-aBoxOffset.top-playPlane.height/2;
+                        aleft=Math.min(aleft,maxLeft);
+                        aleft=Math.max(aleft,minLeft);
+                        atop=Math.min(atop,maxTop);
+                        atop=Math.max(atop,minTop);
+                        playPlane.style.left=aleft+"px";
+                        playPlane.style.top=atop+"px";
+                        return false;
+                    }*/
+                    //发射子弹
+
+                   var btTime=[200 , 300 , 350 , 13];
+                    playPlane.bullet=0;//子弹等级
+                    playPlane.btime=setInterval(function (){
+                        CreateBullte(playPlane);
+                    },btTime[index]);
+                return playPlane;
+            }
+
+            //创建子弹
+             function CreateBullte(playPlane){
+                switch(playPlane.bullet){
+                    case 0:
+                        var Bt=new Image();
+                            Bt.className="bullet";
+                            Bt.src="img/bullet.png";
+                            Bt.width=6;
+                            Bt.height=22;
+                            Bt.style.left=playPlane.offsetLeft+playPlane.width/2-Bt.width/2+"px";
+                            Bt.style.top=playPlane.offsetTop-Bt.height+17+"px";
+                            aBox.appendChild(Bt);
+                            Bt.timer=requestAnimationFrame(Bmove);
+                            function Bmove() {
+                                var bTop=Bt.offsetTop-17;
+                                if(bTop>0){
+                                    Bt.style.top=bTop+"px";
+                                    Bt.timer=requestAnimationFrame(Bmove);
+                                }else{
+                                    cancelAnimationFrame(Bt.timer);
+                                    aBox.removeChild(Bt);      
+                                }
+
+                            }
+                        break;
+                     case 1:
+                            //左边子弹
+                            var Bt1=new Image();
+                            Bt1.className="bullet";
+                            Bt1.src="img/bullet1.png";
+                            Bt1.width=6;
+                            Bt1.height=22;
+                            Bt1.style.left=playPlane.offsetLeft+playPlane.width/2-20-Bt1.width/2+"px";
+                            Bt1.style.top=playPlane.offsetTop-Bt1.height+17+"px";
+                            aBox.appendChild(Bt1);
+                            Bt1.timer=requestAnimationFrame(Bmove11);
+                            function Bmove11() {
+                                var bTop1=Bt1.offsetTop-17;
+                                if(bTop1>0){
+                                    Bt1.style.top=bTop1+"px";
+                                    Bt1.timer=requestAnimationFrame(Bmove11);
+                                }else{
+                                    cancelAnimationFrame(Bt1.timer);
+                                    aBox.removeChild(Bt1);
+                                    
+                                }
+
+                            };
+
+                            //右边子弹
+                            var Bt2=new Image();
+                            Bt2.className="bullet";
+                            Bt2.src="img/bullet1.png";
+                            Bt2.width=6;
+                            Bt2.height=22;
+                            Bt2.style.left=playPlane.offsetLeft+playPlane.width/2+20-Bt2.width/2+"px";
+                            Bt2.style.top=playPlane.offsetTop-Bt2.height+17+"px";
+                            aBox.appendChild(Bt2);
+                            Bt2.timer=requestAnimationFrame(Bmove12);
+                            function Bmove12() {
+                                var bTop2=Bt2.offsetTop-17;
+                                if(bTop2>0){
+                                    Bt2.style.top=bTop2+"px";
+                                    Bt2.timer=requestAnimationFrame(Bmove12);
+                                }else{
+                                    cancelAnimationFrame(Bt2.timer);
+                                    aBox.removeChild(Bt2);
+                                    
+                                }
+
+                            };
+                        break;
+                     case 2:
+                            //左边子弹
+                            var Bt1=new Image();
+                            Bt1.className="bullet";
+                            Bt1.src="img/bullet1.png";
+                            Bt1.width=6;
+                            Bt1.height=22;
+                            Bt1.style.left=playPlane.offsetLeft+playPlane.width/2-25-Bt1.width/2+"px";
+                            Bt1.style.top=playPlane.offsetTop-Bt1.height+17+"px";
+                            aBox.appendChild(Bt1);
+                            Bt1.timer=requestAnimationFrame(Bmove11);
+                            function Bmove11() {
+                                var bTop1=Bt1.offsetTop-17;
+                                if(bTop1>0){
+                                    Bt1.style.top=bTop1+"px";
+                                    Bt1.timer=requestAnimationFrame(Bmove11);
+                                }else{
+                                    cancelAnimationFrame(Bt1.timer);
+                                    aBox.removeChild(Bt1);
+                                    
+                                }
+
+                            };
+
+                            //右边子弹
+                            var Bt2=new Image();
+                            Bt2.className="bullet";
+                            Bt2.src="img/bullet1.png";
+                            Bt2.width=6;
+                            Bt2.height=22;
+                            Bt2.style.left=playPlane.offsetLeft+playPlane.width/2+25-Bt2.width/2+"px";
+                            Bt2.style.top=playPlane.offsetTop-Bt2.height+17+"px";
+                            aBox.appendChild(Bt2);
+                            Bt2.timer=requestAnimationFrame(Bmove12);
+                            function Bmove12() {
+                                var bTop2=Bt2.offsetTop-17;
+                                if(bTop2>0){
+                                    Bt2.style.top=bTop2+"px";
+                                    Bt2.timer=requestAnimationFrame(Bmove12);
+                                }else{
+                                    cancelAnimationFrame(Bt2.timer);
+                                    aBox.removeChild(Bt2);
+                                    
+                                }
+                            };
+                        //中间子弹
+                            var Bt3=new Image();
+                            Bt3.className="bullet";
+                            Bt3.src="img/bullet2.png";
+                            Bt3.width=6;
+                            Bt3.height=22;
+                            Bt3.style.left=playPlane.offsetLeft+playPlane.width/2-Bt3.width/2+"px";
+                            Bt3.style.top=playPlane.offsetTop-Bt3.height+17+"px";
+                            aBox.appendChild(Bt3);
+                            Bt3.timer=requestAnimationFrame(Bmove13);
+                            function Bmove13() {
+                                var bTop3=Bt3.offsetTop-17;
+                                if(bTop3>0){
+                                    Bt3.style.top=bTop3+"px";
+                                    Bt3.timer=requestAnimationFrame(Bmove13);
+                                }else{
+                                    cancelAnimationFrame(Bt3.timer);
+                                    aBox.removeChild(Bt3);
+                                    
+                                }
+                            };
+                        break;
+                }
+                  
+             }
+            //创建敌军
+            function onEnemy(index,playPlane){
+
+                var eTime=[500,400,200,50];
+               
+                aBox.eTime=setInterval(function (){
+                	if(aBox.score>=showBossScore){
+                		if(!isBoss){
+                			isBoss=true;
+                			 //检测里面的是否清除完毕
+		                    (function check() {
+				            		var  el=OnGetClass("enemy")//敌军
+		                            if(el.length===0){
+		                                cancelAnimationFrame( aBox.over);
+		                                onBoss(index,playPlane);
+		                            }else {									
+		                                aBox.over=requestAnimationFrame(check);
+		                            }
+		                    })();
+                			
+                		}
+                	}else{
+                		
+                		onSoldiers(index,playPlane);
+                	}
+                	
+                	
+               		//onSoldiers(index,playPlane);
+                },eTime[index]);
+            }
+            //创建boss
+             function onBoss(index,playPlane){
+             		
+            	 	var boxW=aBox.clientWidth;
+                	var boxH=aBox.clientHeight;
+            	     var aEnemy=new Image();
+            	     var bearing=1;//boss运动的水平方向  1右 -1左
+            	     var isShoting=false;//是否发射激光
+            	      firing=false;////判断boss是否可以开火
+                    aEnemy.className="enemy boss";
+                    aEnemy.src="img/boss.png";
+                    aEnemy.width= 572/3;
+                    aEnemy.height=374/3;
+                   var aLeft=(boxW-aEnemy.width)/2;
+                    aEnemy.v=5;
+                    aEnemy.life=200+numBoss*100;
+                    aEnemy.style.left=aLeft+"px";
+                    aEnemy.style.top=-aEnemy.height-50+"px";
+                    aBox.appendChild(aEnemy);
+					aBoss=aEnemy;
+                    //敌军子弹
+                    var ebtTime=[100, 1000 , 1000 , 1000];
+                    aEnemy.bullet=0;//子弹等级
+                   	
+                    //EnemyButtle();
+                    (function EnemyButtle(){
+                    	if(firing){//判断boss是否可以开火
+                    		 var  k=Math.floor(Math.random()*10)//子弹的射速
+                    		 	//第1种攻击模式
+		                        if((k==1&&isShoting==false)||(k==111&&numBoss>2)){
+		                        	for(var i=0;i<2+numBoss*2;i++){
+		                        		 var eBt=new Image();
+			                            eBt.className="ebullet";
+			                            eBt.src="img/bullet-enemy.png";
+			                            eBt.v=2;
+			                            eBt.width=10;
+			                            eBt.height=10;
+			                            eBt.style.left=aEnemy.offsetLeft+aEnemy.width/2-eBt.width/2+"px";
+			                            eBt.style.top=aEnemy.offsetTop+aEnemy.height-eBt.height+"px";
+			                            aBox.appendChild(eBt);
+			                            var vx=-(2+numBoss*2)/2+i;
+			                            var vy=3;  
+			                      		eBBmove(eBt,vx,vy,playPlane);
+		                        	}
+		                         }
+		                        //第2种攻击模式 激光
+		                      	if(k==2&&isShoting==false&&numBoss>1){
+		                      			
+		                      			isShoting=true;
+		                      			var rDiv=document.createElement("div");
+		                      				rDiv.id="ready";
+		                      				var rImg=new Image();
+			                            	rImg.src="img/laser_ready.png";
+			                            	rDiv.appendChild(rImg);
+		                      				aBox.appendChild(rDiv);
+		                      				onReady(rDiv);
+		                      			//激光预备
+		                      			  function onReady(obj){
+								    	  		var rNum=0;
+								    	  		obj.style.height="0px";
+								    	  		obj.style.width="112px";
+								    	  	
+								            	obj.t=requestAnimationFrame(bgmove);
+								            	function bgmove(){
+								            		var bHeight=obj.offsetHeight;
+								            		
+								            		bHeight+=5;
+								            		if(bHeight>=35){
+								            			rNum++;
+								            			bHeight=0;
+								            		};
+								            		obj.style.height=bHeight+"px";
+								            		obj.style.width="112px";
+								            		obj.style.left=aBoss.offsetLeft+(aBoss.offsetWidth-obj.offsetWidth)/2+28+"px";
+				                            		obj.style.top=aBoss.offsetTop+aBoss.offsetHeight-10+"px";
+				                            		
+								            		if(rNum>10){
+								            			cancelAnimationFrame(obj.t);
+								            			aBox.appendChild(obj);
+								            			onShoot();
+								            		}else{
+								            			obj.t=requestAnimationFrame(bgmove);
+								            		}
+								            		}
+								            	
+								           		 }
+		                      			  //发射
+		                      			function onShoot(){
+		                      				var laser=document.createElement("div");
+		                      				laser.className="laser";
+		                      				laser.id="laser";
+			                      			var ul=document.createElement("ul");
+			                      			laser.appendChild(ul);
+			                      			for(var i=0;i<2;i++){
+			                      				var ali=document.createElement("LI"),
+			                      				 aImg=new Image();
+			                      				 /*ali.style.height="288px";
+			                      				 ali.style.width="114px";*/
+			                      				 if(i==0){
+			                      				 	ali.id="ht";
+			                      				 }else{
+			                      				 	ali.id="ft";
+			                      				 }
+			                      				  aImg.src="img/boss_bullet.png";
+			                      				  ali.appendChild(aImg);
+			                      				  ul.appendChild(ali);
+			                      			}
+			                        		 aBox.appendChild(laser);
+			                        		 onLaMove(laser);
+				                      		function onLaMove(lObj){
+									    	 	var cObj=lObj.getElementsByTagName("ul")[0];
+									            	lObj.t=setInterval(eAction,1000/60);
+									            var laserT=0;
+									            	function eAction(){
+									            		laserT++;
+									            		var objH=lObj.offsetHeight;
+									            		objH+=10;
+									            		if(objH>=286){
+									            			objH=286;
+									            			var bTop=cObj.offsetTop;
+										            		bTop+=10;
+										            		if(bTop>=0)bTop=-288;
+										            		cObj.style.top=bTop+"px";
+									            		}
+									     				lObj.style.height=objH+'px';
+									     				lObj.style.left=aBoss.offsetLeft+(aBoss.offsetWidth-lObj.offsetWidth)/2+1+"px";
+				                            			lObj.style.top=aBoss.offsetTop+aBoss.offsetHeight-10+"px";
+				                            			  if(coll(lObj,playPlane)){
+										                       if(playPlane.fanghu){//防护盾是否开启状态
+										                                 return;
+										                           }   
+										                            //我 军灭忙
+										                           onOver0(playPlane);								                   
+										                 		}
+				                            			 //激光消失
+				                            			 if(laserT>150+numBoss*20){
+				                            			 	
+				                            			 	clearInterval(lObj.t);
+				                            			 	aBox.removeChild(lObj);
+				                            			 	isShoting=false;
+				                            			 }
+									            	}
+									            }
+			                      			}
+		                         }
+                    	}
+                            aEnemy.btime=setTimeout(EnemyButtle,100);
+                    })();
+                   
+                    
+                   
+                    //敌军移动
+                    aEnemy.move=requestAnimationFrame(EnemyMove);
+                    function EnemyMove() {
+                        var aTop=aEnemy.offsetTop+aEnemy.v/3;
+                        var aLeft=aEnemy.offsetLeft+aEnemy.v*bearing/3;
+                        if(aTop<=boxH){
+                            var oBt=OnGetClass("bullet");   
+                            //boss移动
+                            if(aTop>=100){
+                            	//右边界
+                            	firing=true;
+                            	if(aLeft>=boxW-aEnemy.width){
+                            		bearing=-1;
+                            	}
+                            	if(aLeft<=0){
+                            		bearing=1;
+                            	}
+                            	 aEnemy.style.left=aLeft+"px";
+                            }else{
+                            	 aEnemy.style.top=aTop+"px";
+                            }
+                            //检测敌军与子弹碰撞
+                            for(var i=0;i<oBt.length;i++){
+                                if(coll(aEnemy,oBt[i])){
+                                	aEnemy.life--;
+                                	createBoom(oBt[i],"3");
+                                	cancelAnimationFrame(oBt[i].timer);
+                                	aBox.removeChild(oBt[i]);
+                                }
+                                //console.log(aEnemy.life);
+                                if(aEnemy.life<=0){
+                                	//清除激光
+                                	
+                                	 if(document.getElementById("laser")){
+					                   		clearInterval(document.getElementById("laser").t);
+					                   		aBox.removeChild(document.getElementById("laser"));
+					                   	}
+					                   	if(document.getElementById("ready")){
+					                   		clearInterval(document.getElementById("ready").t);
+					                   		aBox.removeChild(document.getElementById("ready"));
+					                   	}
+                                	//敌军爆炸
+                                    createBoom(aEnemy,"1",playPlane);
+                                    cancelAnimationFrame(aEnemy.move);
+                                    clearTimeout(aEnemy.btime);
+                                    aBox.removeChild(aEnemy);
+                                   
+                                    //加分
+                                    aBox.score+=50+numBoss*50;
+                                    //出现下一个boss
+                                     numBoss++;
+                                    isBoss=false;
+                                    showBossScore=aBox.score+50+numBoss*10;
+                                    OnGetClass("score")[0].innerHTML="得分："+aBox.score;
+                                    return;
+                                }
+                            }
+
+                            //检测敌军与我军的爆炸
+                            if(coll(aEnemy,playPlane)){
+                                //清除敌军
+                               
+                                if(playPlane.fanghu){//防护盾是否开启状态
+                                     return;
+                                }                              
+                                //我 军灭忙
+                                onOver0(playPlane);
+                                return;
+                            }
+                            aEnemy.move=requestAnimationFrame(EnemyMove);
+                        }else{
+                            clearTimeout(aEnemy.btime);
+                            cancelAnimationFrame(aEnemy.move);
+                            aBox.removeChild(aEnemy);
+                        }
+
+                    }
+            }
+            //创建小兵
+            function onSoldiers(index,playPlane){
+            	 	var boxW=aBox.clientWidth;
+                	var boxH=aBox.clientHeight;
+            	     var aEnemy=new Image();
+                    aEnemy.className="enemy";
+                    aEnemy.src="img/enemy.png";
+                    aEnemy.width= 23;
+                    aEnemy.height=30;
+                   var aLeft=Math.random()*(boxW-aEnemy.width);
+                    aEnemy.v=Math.random()*3+1+numBoss*0.1;
+                    aEnemy.style.left=aLeft+"px";
+                    aEnemy.style.top=0+"px";
+                    aBox.appendChild(aEnemy);
+
+                    //敌军子弹
+                    var ebtTime=[100, 1000 , 1000 , 1000];
+                    aEnemy.bullet=0;//子弹等级
+                   
+                    //EnemyButtle();
+                    (function EnemyButtle(){
+                        var  k=Math.floor(Math.random()*50)
+                        if(k==1){
+                            var eBt=new Image();
+                            eBt.className="ebullet";
+                            eBt.src="img/bullet-enemy.png";
+                            eBt.v=2;
+                            eBt.width=10;
+                            eBt.height=10;
+                            eBt.style.left=aEnemy.offsetLeft+aEnemy.width/2-eBt.width/2+"px";
+                            eBt.style.top=aEnemy.offsetTop-eBt.height+17+"px";
+                            aBox.appendChild(eBt);
+                            var v=onTrack(eBt,playPlane);
+                            var vx=v.vx;
+                            var vy=v.vy;
+							eBBmove(eBt,vx,vy,playPlane);
+                           
+                         }
+            
+                            aEnemy.btime=setTimeout(EnemyButtle,100);
+                    })();
+                   
+
+                    //敌军移动
+                    aEnemy.move=requestAnimationFrame(EnemyMove);
+                    function EnemyMove() {
+                        var aTop=aEnemy.offsetTop+aEnemy.v;
+                        if(aTop<=boxH){
+                            var oBt=OnGetClass("bullet");
+                            aEnemy.style.top=aTop+"px";
+                            //检测敌军与子弹碰撞
+                            for(var i=0;i<oBt.length;i++){
+                                if(coll(aEnemy,oBt[i])){
+                                    //敌军爆炸
+                                    createBoom(aEnemy,"1",playPlane);
+                                    cancelAnimationFrame(aEnemy.move);
+                                    clearTimeout(aEnemy.btime);
+                                    aBox.removeChild(aEnemy);
+                                    cancelAnimationFrame(oBt[i].timer);
+                                    aBox.removeChild(oBt[i]);
+                                    //加分
+                                    aBox.score+=1;
+                                    OnGetClass("score")[0].innerHTML="得分："+aBox.score;
+                                    return;
+                                }
+                            }
+
+                            //检测敌军与我军的爆炸
+                            if(coll(aEnemy,playPlane)){
+
+                                //清除敌军
+                                createBoom(aEnemy,"1");
+                                cancelAnimationFrame(aEnemy.move);
+                                clearTimeout(aEnemy.btime);
+                                aBox.removeChild(aEnemy);
+
+                                if(playPlane.fanghu){//防护盾是否开启状态
+                                     return;
+                                }
+                                 
+                                //我 军灭忙
+                                onOver0(playPlane);
+                                return;
+                            }
+                            aEnemy.move=requestAnimationFrame(EnemyMove);
+                        }else{
+                            clearTimeout(aEnemy.btime);
+                            cancelAnimationFrame(aEnemy.move);
+                            aBox.removeChild(aEnemy);
+                        }
+
+                    }
+            }
+            function onOver0(playPlane) {
+                      //清除我军
+                    createBoom(playPlane,"2");
+                    //删除定时器
+                    clearInterval(playPlane.btime);
+                    clearInterval(aBox.eTime);
+                    //去除移动事件
+                     //清楚飞机的上的定时器
+                    cancelAnimationFrame(playPlane.timeArr[87]);
+                    cancelAnimationFrame(playPlane.timeArr[83]);
+                    cancelAnimationFrame(playPlane.timeArr[65]);
+                    cancelAnimationFrame(playPlane.timeArr[68]);
+                    //去除键盘事件
+                    document.onkeydown=null;
+                    document.onkeyup=null;
+                    if(OnGetClass("player").length!=0){aBox.removeChild(playPlane);}
+                    if(OnGetClass("boss").length!=0){
+                    	clearTimeout(aBoss.btime);
+                 		aBox.removeChild(aBoss);
+                    }
+                   	if(document.getElementById("laser")){
+                   		clearInterval(document.getElementById("laser").t);
+                   		aBox.removeChild(document.getElementById("laser"));
+                   	}
+                   	if(document.getElementById("ready")){
+                   		clearInterval(document.getElementById("ready").t);
+                   		aBox.removeChild(document.getElementById("ready"));
+                   	}
+                   
+                    //结束缓冲
+                    //清除子弹 
+                    
+                    //检测里面的是否清除完毕
+                    (function check() {
+		            		var  el=OnGetClass("enemy"),//敌军
+		                     bl=OnGetClass("bullet"),//我军子弹
+                             ebl=OnGetClass("ebullet"),//敌军子弹
+		                     bo=OnGetClass("boom"),//爆炸
+                             pr=OnGetClass("Prop");//道具
+                            
+                            if(el.length===0&&bl.length===0&&ebl.length===0&&bo.length===0&&pr.length===0){
+
+                                cancelAnimationFrame( aBox.over);
+                                onOver();
+                            }else {
+                                aBox.over=requestAnimationFrame(check);
+                            }
+                    })();
+            }
+            //结束界面
+            function onOver() {
+            	clearInterval(BgTime);
+                aBox.innerHTML="";
+                var aOver=document.createElement("div");
+                    aOver.className="over";
+                    aOver.innerHTML="<h2>Game Over</h2><p class='showScore'>您的最终得分：</p><p class='scoreText'><span style='color:#F60;'>"+aBox.score+"</span>分</p>";
+                    aBox.appendChild(aOver);
+                var restBtn=document.createElement("div");
+                    restBtn.className="rest";
+                    restBtn.innerHTML="重新开始";
+                    aOver.appendChild( restBtn);
+                     restBtn.onclick=function (){
+                        init();
+                    }
+
+            }
+            //创建爆炸
+            function createBoom(obj,index,playPlane) {
+                //index=index==1?"":index;
+                var boom=new Image();
+                var imgIndex=index==1||index==3?"":index;
+                
+                var num=0,
+                rotation=0;
+                     boom.className="boom";
+                     
+                     switch(index){
+                     	case "1":
+                     		 boom.width=obj.width;
+                     		 boom.height=obj.height;
+                     		break;
+                     	case "2":
+                     		 boom.width=obj.width;
+                     		 boom.height=obj.height;
+                     		break;
+                     	case "3":
+                     		 boom.width=23/8;
+                     		 boom.height=30/8;
+                     		
+                     		break;
+                     }
+                    
+                     boom.src="img/boom"+imgIndex+".png";
+                     boom.style.left=obj.offsetLeft+obj.offsetWidth/2-boom.width/2+"px";
+                     boom.style.top=obj.offsetTop+obj.offsetHeight/2-boom.height/2+"px";
+                     aBox.appendChild(boom);
+                     boom.time=requestAnimationFrame(m);
+                    function m() {
+                        num++;
+                       
+                        rotation=num*72;
+                        boom.width+=2;
+                        boom.height+=2;
+                        boom.style.left=boom.offsetLeft-1+"px";
+                        boom.style.top=boom.offsetTop-1+"px";
+                        boom.style.transform="rotate("+rotation+"deg)";
+
+                        if(num<10){
+                            boom.time=requestAnimationFrame(m);
+                        }else{
+                            if(playPlane){
+                                //道具包
+                                if(Math.floor(Math.random()*20)>18){
+                                    createProp(boom,playPlane);
+                                }
+                            }
+                            aBox.removeChild(boom);
+                            cancelAnimationFrame(boom.time);
+
+
+                        }
+                    }
+
+            }
+            //创建道具包
+            function createProp(obj,playPlane){
+              var TypeArr=[
+                    "img/fanghu.png",
+                    "img/prop-bt.png"
+              ];
+              type=Math.floor(Math.random()*2+0);//道具类型 0防护罩 
+              var aProp=new Image();
+                aProp.src=TypeArr[type];
+                aProp.width=50;
+                aProp.height=50;
+                aProp.className="Prop";
+                aProp.style.left=obj.offsetLeft+obj.width/2-aProp.width/2+"px";
+                aProp.style.top=obj.offsetTop+obj.height/2-aProp.height/2+"px";
+                aBox.appendChild(aProp);
+
+                var pLeft=0;
+                var pTop=0;
+                aProp.vx=Math.floor(Math.random()*2)==0?1:-1;
+                aProp.vy=2;
+                 var minLeft= -aProp.width/2,
+                    maxLeft=aBox.clientWidth-aProp.width/2,
+                    maxTop=aBox.clientHeight;
+                (function aPropMove(){
+                    pLeft=aProp.offsetLeft;
+                    pTop=aProp.offsetTop;
+                    if(pTop<maxTop){
+                         
+                         if(coll(aProp,playPlane)){
+                            cancelAnimationFrame(aProp.move);
+                            aBox.removeChild(aProp);
+                            createZB(playPlane,type);
+                            return;
+                         }
+                         if(pLeft>maxLeft||pLeft<minLeft){
+                            aProp.vx=-aProp.vx;
+                         }
+                         pLeft=aProp.offsetLeft+aProp.vx;
+                         pTop=aProp.offsetTop+aProp.vy;
+                         aProp.style.top=pTop+"px";
+                         aProp.style.left=pLeft+"px";
+                         aProp.move=requestAnimationFrame(aPropMove);
+                    }else{
+                        cancelAnimationFrame(aProp.move);
+                        aBox.removeChild(aProp);
+                    }
+                   
+                })();
+              
+            }
+			 //普通子弹
+         		function eBBmove(eBt,vx,vy,playPlane) {	
+                    var bLeft=eBt.offsetLeft+vx;
+                    var bTop=eBt.offsetTop+vy;
+                    if(bTop>aBox.offsetHeight||bTop<0||bLeft<0||bLeft>aBox.offsetWidth){
+                        cancelAnimationFrame(eBt.timer);
+                        aBox.removeChild(eBt); 
+                    }else{
+                    	//console.log("pp="+eBt);
+                         if(coll(eBt,playPlane)){
+                              //敌军子弹移除
+                              cancelAnimationFrame(eBt.timer);
+                              aBox.removeChild(eBt); 
+                               if(playPlane.fanghu){//防护盾是否开启状态
+                                         return;
+                                   }   
+                                    //我 军灭忙
+                                    onOver0(playPlane);
+                                    return;
+                              //
+                         }else{
+                             eBt.style.top=bTop+"px";
+                             eBt.style.left=bLeft+"px";
+                             eBt.timer=requestAnimationFrame(function(){
+                             	eBBmove(eBt,vx,vy,playPlane);
+                             });
+                         }
+                         
+                    }
+                }
+         
+          //自动锁定
+            function onTrack(obj1,obj2){
+                 var ajson={
+                        vx:0,
+                        vy:0
+                    };
+                    var aL1=obj1.offsetLeft+ obj1.width/2,aT1=obj1.offsetTop+obj1.height/2;
+                    var aL2=obj2.offsetLeft+ obj2.width/2,aT2=obj2.offsetTop+obj2.height/2;
+                    var xd=aL2-aL1;
+                    var yd=aT2-aT1;
+                    var bcos=xd/Math.sqrt(xd*xd+yd*yd);
+                    var bsin=yd/Math.sqrt(xd*xd+yd*yd);
+                    ajson.vx=obj1.v*bcos;
+                    ajson.vy=obj1.v*bsin;
+                    return ajson;
+            }
+            //加载飞机装备
+            function createZB(playPlane,type){
+                switch(type){
+                    case 0://防护罩处理
+                        if( playPlane.fanghu){
+                             playPlane.fanghuAgain=true
+                            return;
+                        }
+
+                        playPlane.fanghu=true;//打开防护罩
+                        playPlane.fanghuAgain=false;//是否加时间
+                        var fh=new Image();//防护罩
+                        fh.src="img/fanghu.png";
+                        fh.width=80;
+                        fh.height=80;
+                        fh.className="fanghu";
+                        fh.style.left=playPlane.offsetLeft+playPlane.width/2-fh.width/2+"px";
+                        fh.style.top=playPlane.offsetTop+playPlane.height/2-fh.height/2+"px";
+                        aBox.appendChild(fh);
+                        var fanghuNum=0;
+                        (function fanghuTime(){
+                            fanghuNum++;
+                            if(playPlane.fanghuAgain){
+                                playPlane.fanghuAgain=false;
+                                fanghuNum=0;
+                            }
+                            if(fanghuNum<300){
+                                 fh.style.left=playPlane.offsetLeft+playPlane.width/2-fh.width/2+"px";
+                                 fh.style.top=playPlane.offsetTop+playPlane.height/2-fh.height/2+"px";
+                                 playPlane.fanghuT=requestAnimationFrame(fanghuTime);
+                            }else{
+                                playPlane.fanghu=false;
+                                cancelAnimationFrame(playPlane.fanghuT);
+                                aBox.removeChild(fh)
+                            }
+                           
+                        })();
+                        break;
+                    case 1://子弹处理
+                        var d=playPlane.bullet;
+                        d++;
+                        playPlane.bullet=d>=2?2:d;
+                
+                        break;
+                    case 0:
+                        break;
+                }
+            }
+            //碰撞检测
+            function coll(obj1,obj2){
+                    var L1=obj1.offsetLeft,
+                        R1=L1+obj1.offsetWidth,
+                        T1=obj1.offsetTop,
+                        B1=T1+obj1.offsetHeight;
+                    var L2=obj2.offsetLeft,
+                        R2=L2+obj2.offsetWidth,
+                        T2=obj2.offsetTop,
+                        B2=T2+obj2.offsetHeight;
+                    return !(L1>R2||R1<L2||T1>B2||B1<T2);
+
+            }
+            //获取className
+            function OnGetClass(cName){
+
+                if(document.getElementsByClassName){
+                      return document.getElementsByClassName(cName);
+                }else{
+                    var All=document.getElementsByTagName("*");
+                    var arr=[];
+                    for(var i=0;i<All.length;i++){
+                        var NameArr=All[i].className.split(" ");
+                        for(var j=0;j<NameArr.length;j++){
+                            if(NameArr[j]==cName){
+                                arr.push(All[i]);
+                            }
+                        }
+                    }
+                    return arr;
+                }
+            }
+            function onOffset(obj){
+                    var ajon={left:0,top:0}
+                    while(obj!==document.body){
+                        ajon.left+=obj.offsetLeft;
+                        ajon.top+=obj.offsetTop;
+                        obj=obj.offsetParent;
+                    };
+                    return ajon;
+            }
+        })();
+    </script>
+</body>
+</html>
